@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="cartao">
+  <p class="sub">Carregando painel...</p>
+</div>
+<script>
+fetch('/static/partials/previos.html').then(r=>r.text()).then(html=>{
+  document.getElementById('content-area').innerHTML = html;
+  window.dispatchEvent(new CustomEvent('tab-changed',{detail:'previos'}));
+});
+</script>
+{% endblock %}

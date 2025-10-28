@@ -1,0 +1,50 @@
+<div class="cartao">
+  <h3>Previsão de Nota</h3>
+  <p class="sub">Use seu histórico para prever a nota esperada.</p>
+
+  <label>Matéria (opcional)</label>
+  <select id="pred-subject"><option value="">-- Todas as matérias --</option></select>
+
+  <div class="linha" style="margin-top:8px">
+    <div style="flex:1;margin-right:8px">
+      <label>Horas planejadas</label>
+      <input id="pred-hours" type="number" step="0.1" value="2" />
+    </div>
+    <div style="flex:1">
+      <label>Qualidade (0.2 - 1.4)</label>
+      <input id="pred-quality" type="number" step="0.01" value="1.0" />
+    </div>
+  </div>
+
+  <label style="margin-top:8px">Dificuldade</label>
+  <select id="pred-difficulty"><option value="1">Fácil</option><option value="2" selected>Médio</option><option value="3">Difícil</option></select>
+
+  <button id="pred-go" class="botao" style="margin-top:10px">Prever</button>
+  <div id="pred-result" class="resultado" style="display:none"></div>
+</div>
+
+<script>
+async function loadPredSubjects(){
+  const res = await fetch('/api/subjects'); const subs = await res.json();
+  const sel = document.getElementById('pred-subject'); sel.innerHTML = '<option value="">-- Todas as matérias --</option>';
+  subs.forEach(s=> sel.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.name}</option>`));
+}
+document.getElementById('pred-go').onclick = async ()=>{
+  const payload = {
+    subject_id: document.getElementById('pred-subject').value || null,
+    hours: parseFloat(document.getElementById('pred-hours').value||0),
+    quality: parseFloat(document.getElementById('pred-quality').value||1),
+    difficulty: parseInt(document.getElementById('pred-difficulty').value)
+  };
+  const res = await fetch('/api/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const box = document.getElementById('pred-result');
+  if (res.ok) {
+    const j = await res.json();
+    box.style.display='block'; box.innerHTML = '<b>Nota prevista:</b> ' + j.prediction.toFixed(2) + ' ★';
+  } else {
+    const j = await res.json();
+    box.style.display='block'; box.innerHTML = 'Erro: ' + (j.error||'precise mais dados (2+)');
+  }
+};
+window.addEventListener('tab-changed', async (e)=>{ if (e.detail !== 'previsao') return; await loadPredSubjects(); });
+</script>

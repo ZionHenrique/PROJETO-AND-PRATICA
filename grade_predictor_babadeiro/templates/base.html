@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Previsor de Nota — Babadeiro Deluxe 💅🇧🇷</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --fundo: #0f1724;
+      --cartao: #0b1220;
+      --destaque: #7c3aed;
+      --texto-suave: #9aa4b2;
+      --vidro: rgba(255, 255, 255, 0.03);
+    }
+    body.claro {
+      --fundo: #f3f4f6;
+      --cartao: #ffffff;
+      --destaque: #7c3aed;
+      --texto-suave: #374151;
+      --vidro: rgba(0, 0, 0, 0.03);
+      color: #111827;
+    }
+    * { box-sizing: border-box; font-family: Inter, sans-serif; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, var(--fundo) 0%, var(--cartao) 60%);
+      min-height: 100vh;
+      padding: 18px;
+      transition: background 0.3s, color 0.3s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .container {
+      width:100%; max-width:1100px; background:var(--cartao); border-radius:12px; padding:18px; box-shadow:0 8px 24px rgba(2,6,23,0.5);
+    }
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .titulo{display:flex;gap:12px;align-items:center}
+    .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--destaque),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021223}
+    h1{margin:0;font-size:18px}
+    .sub{color:var(--texto-suave);font-size:13px}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .tab{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--texto-suave);cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,var(--destaque),#22d3ee);color:white;font-weight:600}
+    .actions{display:flex;gap:8px;align-items:center}
+    .botao{background:var(--destaque);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    .cartao{background:var(--vidro);padding:14px;border-radius:10px;margin-top:12px}
+    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:inherit}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left}
+    @media(max-width:900px){ .grid{display:block} .container{padding:12px} .logo{width:44px;height:44px} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="titulo">
+        <div class="logo">EP</div>
+        <div>
+          <h1>Previsor de Nota — Babadeiro Deluxe 💅🇧🇷</h1>
+          <div class="sub">Híbrido — login, SQLite, ML e gráficos bonitos</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btn-export" class="botao">⬇️ Exportar CSV</button>
+        <button id="btn-theme" class="botao">🌙 Tema</button>
+        <a href="{{ url_for('logout') }}" class="botao">Sair</a>
+      </div>
+    </header>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="previos">Estudos Anteriores</div>
+      <div class="tab" data-tab="materias">Matérias</div>
+      <div class="tab" data-tab="previsao">Previsão de Nota</div>
+      <div class="tab" data-tab="desempenho">📊 Desempenho Geral</div>
+    </div>
+
+    <div id="content-area">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+<script>
+document.getElementById('btn-theme').onclick = () => document.body.classList.toggle('claro');
+const tabs = document.querySelectorAll('.tab');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x=>x.classList.remove('active')); t.classList.add('active');
+  const tab = t.dataset.tab;
+  fetch('/static/partials/' + tab + '.html').then(r=>r.text()).then(html=>{
+    document.getElementById('content-area').innerHTML = html;
+    window.dispatchEvent(new CustomEvent('tab-changed',{detail:tab}));
+  });
+}));
+// export helper loaded from static
+</script>
+<script src="{{ url_for('static', filename='export.js') }}"></script>
+</body>
+</html>
