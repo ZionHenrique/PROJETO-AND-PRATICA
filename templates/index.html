@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gamificação — Painel Interativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+:root{
+  --bg:#0f172a;
+  --card:#111827;
+  --accent:#7c3aed;
+  --muted:#94a3b8;
+  --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+body{margin:0;background:linear-gradient(180deg,#071026 0%, #081224 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
+.wrap{width:100%;max-width:1200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.7);}
+header{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+.logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021223;}
+h1{font-size:20px;margin:0;}
+.pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.025);font-size:12px;margin-right:6px;}
+.muted{color:var(--muted);font-size:14px;}
+.grid{display:grid;grid-template-columns:1fr 2fr;gap:18px;}
+.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);}
+input,select,button{width:100%;padding:8px 10px;margin-top:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);color:inherit}
+button{background:var(--accent);color:#021223;font-weight:700;cursor:pointer;border:none}
+.small{flex:1}
+.row{display:flex;gap:10px}
+.chart{height:260px}
+.table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;text-align:left}
+.nav-btn{display:inline-block;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);text-decoration:none;margin-left:auto}
+.footer{margin-top:12px;color:var(--muted);font-size:13px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.chart{height:180px}}
+
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <header>
+      <div class="logo">GF</div>
+      <div>
+        <h1>Gamificação — Painel Interativo</h1>
+        <p class="muted">Carregue o CSV de notas e engajamento para explorar métricas e gráficos gerados automaticamente.</p>
+      </div>
+      <a href="/previsor" class="nav-btn" title="Ir para Previsor">Ir para Previsor de Nota</a>
+    </header>
+
+    <div class="grid">
+      <div class="card" aria-label="Controles">
+        <h2>📂 Carregar arquivo</h2>
+        <label for="csvfile">Arquivo CSV:</label>
+        <input id="csvfile" type="file" accept=".csv">
+        <label for="delimiter">Delimitador:</label>
+        <select id="delimiter"><option value="">Auto</option><option value=",">Vírgula</option><option value=";">Ponto e vírgula</option></select>
+        <label for="previewRows">Linhas de pré-visualização:</label>
+        <input id="previewRows" type="number" value="5" min="3">
+        <button id="btnProcess">Gerar métricas</button>
+        <button id="downloadResults" style="background:#06b6d4;margin-top:8px">Baixar resultados</button>
+        <div class="muted help" style="margin-top:10px">Dica: colunas esperadas: <span class="pill">User</span> <span class="pill">Final_Exam</span> <span class="pill">avg_grade_q*</span> <span class="pill">no_access_q*</span></div>
+      </div>
+
+      <div class="card">
+        <div id="preview"></div>
+        <div id="metrics" style="margin-top:12px"></div>
+        <div id="chart1" class="chart"></div>
+        <div id="chart2" class="chart"></div>
+        <div id="chart3" class="chart"></div>
+      </div>
+    </div>
+
+    <div class="footer">Projeto Flask — pronto para rodar localmente.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+
+  <script>
+    const el=id=>document.getElementById(id);
+    let parsed=null;
+    function numberOrNaN(v){const n=parseFloat(v);return isNaN(n)?NaN:n}
+
+    function computeDerived(df){
+      const cols=Object.keys(df[0]||{});
+      const avgCols=cols.filter(c=>c.toLowerCase().startsWith('avg_grade_q'));
+      const noaccessCols=cols.filter(c=>c.toLowerCase().startsWith('no_access_q'));
+      df.forEach(row=>{
+        const avgVals=avgCols.map(c=>numberOrNaN(row[c])).filter(x=>!isNaN(x));
+        const noVals=noaccessCols.map(c=>numberOrNaN(row[c])).filter(x=>!isNaN(x));
+        row.avg_all_q=avgVals.length?(avgVals.reduce((a,b)=>a+b,0)/avgVals.length):NaN;
+        row.total_no_access=noVals.length?noVals.reduce((a,b)=>a+b,0):0;
+        row.engagement_score=isNaN(row.avg_all_q)?NaN:row.avg_all_q/(1+row.total_no_access);
+      });
+      return {cols,avgCols,noaccessCols};
+    }
+
+    function showPreview(df,n){
+      const preview=df.slice(0,n);
+      if(preview.length===0){el('preview').innerHTML='<div class="muted">Sem linhas para mostrar.</div>';return;}
+      let html='<table class="table"><thead><tr>'+Object.keys(preview[0]).map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+      preview.forEach(r=>{html+='<tr>'+Object.keys(preview[0]).map(k=>`<td>${r[k]??''}</td>`).join('')+'</tr>';});
+      html+='</tbody></table>';
+      el('preview').innerHTML=html;
+    }
+
+    function summarizeNumeric(df,col){
+      const vals=df.map(r=>numberOrNaN(r[col])).filter(x=>!isNaN(x));
+      if(!vals.length)return{count:0,mean:NaN,sd:NaN};
+      return{count:vals.length,mean:jStat.mean(vals),sd:jStat.stdev(vals,true)};
+    }
+
+    function buildMetrics(df){
+      const keys=['avg_all_q','total_no_access','engagement_score'];
+      let html='';
+      keys.forEach(k=>{
+        const s=summarizeNumeric(df,k);
+        html+=`<div><strong>${k}</strong>: média=${isNaN(s.mean)?'—':s.mean.toFixed(3)} • desvio=${isNaN(s.sd)?'—':s.sd.toFixed(3)}</div>`;
+      });
+      el('metrics').innerHTML=html;
+    }
+
+    function plotBoxByUser(df,target='Final_Exam'){
+      if(!df.length || !(target in df[0]))return;
+      const g1=df.filter(r=>String(r.User)==='1').map(r=>numberOrNaN(r[target])).filter(x=>!isNaN(x));
+      const g0=df.filter(r=>String(r.User)==='0').map(r=>numberOrNaN(r[target])).filter(x=>!isNaN(x));
+      Plotly.newPlot('chart1',[{y:g0,type:'box',name:'User=0'},{y:g1,type:'box',name:'User=1'}],{title:'Distribuição Final_Exam por User'});
+    }
+
+    function plotCorrHeatmap(df,cols){
+      const numericCols=cols.filter(c=>df.some(r=>!isNaN(numberOrNaN(r[c]))));
+      if(numericCols.length===0){el('chart2').innerHTML='';return;}
+      const matrix=numericCols.map(c1=>numericCols.map(c2=>{
+        const pairs=df.map(r=>({a:numberOrNaN(r[c1]),b:numberOrNaN(r[c2])})).filter(p=>!isNaN(p.a)&&!isNaN(p.b));
+        if(pairs.length<2)return 0;return jStat.corrcoeff(pairs.map(p=>p.a),pairs.map(p=>p.b));
+      }));
+      Plotly.newPlot('chart2',[{z:matrix,x:numericCols,y:numericCols,type:'heatmap',colorscale:'Viridis'}],{title:'Mapa de Correlação'});
+    }
+
+    function plotScatterEngagement(df,target='Final_Exam'){
+      if(!df.length || !(target in df[0]))return;
+      const pairs=df.map(r=>({x:numberOrNaN(r.engagement_score),y:numberOrNaN(r[target])})).filter(p=>!isNaN(p.x)&&!isNaN(p.y));
+      Plotly.newPlot('chart3',[{x:pairs.map(p=>p.x),y:pairs.map(p=>p.y),mode:'markers',type:'scatter'}],{title:'Engajamento x Nota Final'});
+    }
+
+    el('btnProcess').addEventListener('click',()=>{
+      const f=el('csvfile').files[0];
+      if(!f){alert('Escolha um arquivo CSV primeiro.');return;}
+      Papa.parse(f,{header:true,skipEmptyLines:true,delimiter:el('delimiter').value||undefined,complete:function(res){
+        parsed=res.data;const meta=computeDerived(parsed);
+        showPreview(parsed,parseInt(el('previewRows').value)||5);
+        buildMetrics(parsed);
+        plotBoxByUser(parsed);
+        plotCorrHeatmap(parsed,meta.cols);
+        plotScatterEngagement(parsed);
+        alert('Processamento concluído!');
+      }});
+    });
+
+    el('downloadResults').addEventListener('click',()=>{
+      if(!parsed){alert('Nenhum dado processado ainda.');return;}
+      const csv=Papa.unparse(parsed);
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='gamificacao_resultados.csv';document.body.appendChild(a);
+      a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+      alert('Download concluído!');
+    });
+  </script>
+</body>
+</html>
