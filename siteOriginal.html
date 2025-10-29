@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Previsor de Nota por Horas de Estudo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#7c3aed;
+      --muted:#9aa4b2;
+      --glass: rgba(255,255,255,0.03);
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{margin:0;background:linear-gradient(180deg,#071026 0%, #081224 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;}
+    .wrap{width:100%;max-width:980px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.7);}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021223;}
+    h1{font-size:18px;margin:0;}
+    p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px;}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;}
+    .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted);}
+    input[type="number"], select, input[type="range"]{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);color:inherit;}
+    .row{display:flex;gap:10px;}
+    .small{flex:1;}
+    .btn{background:var(--accent);color:#021223;border:none;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer;margin-top:8px;}
+    .result{margin-top:12px;padding:12px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);font-size:15px;}
+    .muted{color:var(--muted);font-size:13px;}
+    .chart-wrap{height:300px;}
+    footer{margin-top:12px;color:var(--muted);font-size:13px;}
+    .help{font-size:12px;color:var(--muted);margin-top:8px;}
+    .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.025);font-size:12px;margin-right:6px;}
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}.chart-wrap{height:220px}}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <header>
+      <div class="logo">EP</div>
+      <div>
+        <h1>Previsor de Nota — Estudo e Progresso</h1>
+        <p class="lead">Insira a nota atual, escolha a dificuldade e quantas horas serão dedicadas. O modelo prevê a nota futura e mostra curva de progresso.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card" aria-label="Entradas">
+        <label for="subject">Disciplina (opcional)</label>
+        <input id="subject" type="text" placeholder="Ex.: Matemática, História..." />
+
+        <div style="height:12px"></div>
+
+        <div class="row">
+          <div class="small">
+            <label for="current">Nota atual (0 a 10)</label>
+            <input id="current" type="number" step="0.1" min="0" max="10" value="4.5" />
+          </div>
+          <div class="small">
+            <label for="target">Meta de nota (opcional)</label>
+            <input id="target" type="number" step="0.1" min="0" max="10" placeholder="Ex.: 7.0" />
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+
+        <label for="difficulty">Nível de dificuldade da matéria</label>
+        <select id="difficulty" aria-label="Dificuldade">
+          <option value="easy">Fácil</option>
+          <option value="medium" selected>Médio</option>
+          <option value="hard">Difícil</option>
+        </select>
+
+        <div style="height:10px"></div>
+
+        <label for="quality">Qualidade do estudo (foco, método)</label>
+        <input id="quality" type="range" min="0.2" max="1.4" step="0.01" value="1.0" />
+        <div class="muted" style="margin-top:6px">Arraste para ajustar a eficácia: valores baixos → estudo desorganizado; valores altos → estudo bem orientado.</div>
+
+        <div style="height:12px"></div>
+
+        <label for="hours">Horas de estudo planejadas</label>
+        <input id="hours" type="number" step="0.5" min="0" value="20" />
+
+        <button id="calc" class="btn" style="width:100%;">Calcular previsão</button>
+
+        <div id="output" class="result" aria-live="polite" style="display:none"></div>
+
+        <div class="help">
+          <div class="pill">Modelo: curva exponencial com retorno decrescente</div>
+          <div style="margin-top:6px">Explicação curta: com o mesmo número de horas, um estudo com melhor qualidade rende mais progresso. Matérias difíceis têm aprendizagem mais lenta.</div>
+        </div>
+      </div>
+
+      <div class="card" aria-label="Resultados e gráfico">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Previsão e curva</strong>
+            <div class="muted">Veja o progresso esperado ao longo das horas</div>
+          </div>
+          <div class="muted">Escala: 0 — 10</div>
+        </div>
+
+        <div class="chart-wrap" style="margin-top:12px">
+          <canvas id="chart" width="600" height="300" aria-label="Gráfico de notas ao longo do tempo"></canvas>
+        </div>
+
+        <div id="hours-needed" class="result" style="display:none"></div>
+        <footer>
+          Observação: Este é um modelo estimativo. Resultados individuais variam.
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Função de previsão baseada em modelo exponencial:
+    // nota(t) = current + (maxNote - current) * (1 - exp(-k * t))
+    // k = baseK * qualityFactor
+    // baseK por dificuldade: easy > medium > hard
+    // maxNote = 10 (escala 0-10)
+
+    const el = id => document.getElementById(id);
+    const currentInput = el('current');
+    const qualityInput = el('quality');
+    const hoursInput = el('hours');
+    const difficultyInput = el('difficulty');
+    const targetInput = el('target');
+    const outputDiv = el('output');
+    const hoursNeededDiv = el('hours-needed');
+
+    // Base learning rates (k) por dificuldade — ajustáveis
+    const baseKmap = {
+      easy: 0.22,
+      medium: 0.12,
+      hard: 0.07
+    };
+
+    function predict(current, hours, difficulty, quality) {
+      const maxNote = 10;
+      const baseK = baseKmap[difficulty] || 0.12;
+      const k = baseK * quality;
+      // Proteções
+      if (current >= maxNote) return maxNote;
+      if (hours <= 0) return Math.max(0, Math.min(10, current));
+      const delta = (maxNote - current) * (1 - Math.exp(-k * hours));
+      const predicted = current + delta;
+      return Math.max(0, Math.min(10, predicted));
+    }
+
+    // Calcula quantas horas são necessárias para atingir target
+    // Solve for t in: target = current + (max - current)*(1 - e^{-k t})
+    // => 1 - e^{-k t} = (target - current)/(max - current)
+    // => e^{-k t} = 1 - ratio
+    // => t = - ln(1 - ratio) / k
+    function hoursToReach(current, target, difficulty, quality) {
+      const maxNote = 10;
+      if (target <= current) return 0;
+      if (target >= maxNote) return Infinity; // nunca alcança 10 exatamente em tempo finito (assintótico)
+      const baseK = baseKmap[difficulty] || 0.12;
+      const k = baseK * quality;
+      const ratio = (target - current) / (maxNote - current);
+      if (ratio >= 1) return Infinity;
+      const val = 1 - ratio;
+      if (val <= 0) return Infinity;
+      const t = -Math.log(val) / k;
+      return t;
+    }
+
+    // Chart setup
+    let chart = null;
+    function createChart(labels, data) {
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Nota prevista',
+            data,
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124,58,237,0.12)',
+            fill: true,
+            tension: 0.28,
+            pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: {display:true,text:'Horas de estudo'}},
+            y: { min:0, max:10, title:{display:true,text:'Nota (0-10)'} }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function render() {
+      // leitura segura
+      const current = parseFloat(currentInput.value) || 0;
+      const hours = parseFloat(hoursInput.value) || 0;
+      const difficulty = difficultyInput.value;
+      const quality = parseFloat(qualityInput.value) || 1;
+      const target = parseFloat(targetInput.value);
+
+      // previsão para as horas inseridas
+      const predicted = predict(current, hours, difficulty, quality);
+
+      // mensagem de saída
+      outputDiv.style.display = 'block';
+      outputDiv.innerHTML = `
+        <strong>Disciplina:</strong> ${el('subject').value || '—'}<br>
+        <strong>Nota atual:</strong> ${current.toFixed(1)} • <strong>Horas planejadas:</strong> ${hours.toFixed(1)}h<br>
+        <strong>Previsão de nota:</strong> <span style="color:#7c3aed;font-weight:700">${predicted.toFixed(2)}</span> / 10
+      `;
+
+      // gerar curva: 0 até 2x horas (ou no máximo 200h)
+      const maxHoursPlot = Math.min(Math.max(10, hours * 2), 200);
+      const step = Math.max(1, Math.ceil(maxHoursPlot / 60));
+      const labels = [];
+      const data = [];
+      for (let h = 0; h <= maxHoursPlot; h += step) {
+        labels.push(h.toFixed(0));
+        data.push(predict(current, h, difficulty, quality).toFixed(3));
+      }
+      createChart(labels, data);
+
+      // calcular horas pra meta se foi inserida
+      if (!isNaN(target) && target > current) {
+        const needed = hoursToReach(current, target, difficulty, quality);
+        hoursNeededDiv.style.display = 'block';
+        if (!isFinite(needed) || needed > 10000) {
+          hoursNeededDiv.innerHTML = `<strong>Horas para atingir ${target.toFixed(1)}:</strong> impossível (ou décadas) — objetivo muito próximo de 10. Considere ajustar a meta.`;
+        } else {
+          hoursNeededDiv.innerHTML = `<strong>Horas para atingir ${target.toFixed(1)}:</strong> ~ <strong>${needed.toFixed(1)}h</strong> (estimado)`;
+        }
+      } else {
+        hoursNeededDiv.style.display = 'none';
+      }
+    }
+
+    document.getElementById('calc').addEventListener('click', e => {
+      e.preventDefault();
+      // validações simples
+      const current = parseFloat(currentInput.value);
+      const hours = parseFloat(hoursInput.value);
+      if (isNaN(current) || current < 0 || current > 10) {
+        alert('Digite uma nota atual válida entre 0 e 10.');
+        return;
+      }
+      if (isNaN(hours) || hours < 0) {
+        alert('Digite um número de horas válido (>= 0).');
+        return;
+      }
+      render();
+    });
+
+    // Render inicial
+    window.addEventListener('load', () => {
+      // desenha com valores padrões
+      render();
+    });
+  </script>
+</body>
+</html>
