@@ -13,25 +13,122 @@
   --muted:#94a3b8;
   --glass: rgba(255,255,255,0.03);
 }
-*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-body{margin:0;background:linear-gradient(180deg,#071026 0%, #081224 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
-.wrap{width:100%;max-width:1200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.7);}
-header{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
-.logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021223;}
-h1{font-size:20px;margin:0;}
-.pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.025);font-size:12px;margin-right:6px;}
-.muted{color:var(--muted);font-size:14px;}
-.grid{display:grid;grid-template-columns:1fr 2fr;gap:18px;}
-.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);}
-input,select,button{width:100%;padding:8px 10px;margin-top:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);color:inherit}
-button{background:var(--accent);color:#021223;font-weight:700;cursor:pointer;border:none}
-.small{flex:1}
-.row{display:flex;gap:10px}
-.chart{height:260px}
-.table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
-table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;text-align:left}
-.nav-btn{display:inline-block;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);text-decoration:none;margin-left:auto}
-.footer{margin-top:12px;color:var(--muted);font-size:13px}
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#071026 0%, #081224 60%);
+  color:#e6eef6;
+  min-height:100vh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:28px;
+}
+.wrap{
+  width:100%;
+  max-width:1200px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(2,6,23,0.7);
+}
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:14px;
+}
+.logo{
+  width:56px;
+  height:56px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#2dd4bf);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#021223;
+}
+h1{
+  font-size:20px;
+  margin:0;
+}
+.pill{
+  display:inline-block;
+  padding:6px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.025);
+  font-size:12px;
+  margin-right:6px;
+}
+.muted{color:var(--muted);
+  font-size:14px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:18px;
+}
+.card{
+  background:var(--card);
+  padding:16px;
+  border-radius:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
+}
+input,select,button{
+  width:100%;
+  padding:8px 10px;
+  margin-top:6px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.03);
+  background:var(--glass);
+  color:inherit
+}
+button{
+  background:var(--accent);
+  color:#021223;
+  font-weight:700;
+  cursor:pointer;
+  border:none
+}
+.small{
+  flex:1
+}
+.row{
+  display:flex;
+  gap:10px
+}
+.chart{
+  height:260px
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+  margin-top:8px
+}
+table th,table td{
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:6px;
+  text-align:left
+}
+.nav-btn{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.02);
+  color:var(--muted);
+  text-decoration:none;
+  margin-left:auto
+}
+.footer{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:13px
+}
 @media (max-width:900px){.grid{grid-template-columns:1fr}.chart{height:180px}}
 
   </style>
@@ -127,43 +224,56 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
     const targetInput = el('target');
     const outputDiv = el('output');
     const hoursNeededDiv = el('hours-needed');
-
+    
+    // Mapeamento da dificuldade base (K) para o modelo exponencial.
     const baseKmap = {
       easy: 0.22,
       medium: 0.12,
       hard: 0.07
     };
 
-    function predict(current, hours, difficulty, quality) {
+    // Função que prevê a nota futura usando um modelo de curva de aprendizado exponencial.
+    function preverNota(current, hours, difficulty, quality) {
       const maxNote = 10;
       const baseK = baseKmap[difficulty] || 0.12;
-      const k = baseK * quality;
+      // Ajusta a constante de aprendizado (k) pela qualidade do estudo
+      const k = baseK * quality; 
+      
       if (current >= maxNote) return maxNote;
       if (hours <= 0) return Math.max(0, Math.min(10, current));
+      
+      // Fórmula: Delta = (NotaMáx - NotaAtual) * (1 - e^(-k * Horas))
       const delta = (maxNote - current) * (1 - Math.exp(-k * hours));
       const predicted = current + delta;
+      
       return Math.max(0, Math.min(10, predicted));
     }
 
-    function hoursToReach(current, target, difficulty, quality) {
+    // Função que calcula quantas horas são necessárias para ir da nota atual para a nota alvo.
+    function horasParaAlcancar(current, target, difficulty, quality) {
       const maxNote = 10;
       if (target <= current) return 0;
       if (target >= maxNote) return Infinity;
+      
       const baseK = baseKmap[difficulty] || 0.12;
       const k = baseK * quality;
+      
+      // Inverte a fórmula exponencial para isolar o tempo (t)
       const ratio = (target - current) / (maxNote - current);
       if (ratio >= 1) return Infinity;
       const val = 1 - ratio;
       if (val <= 0) return Infinity;
+      
+      // Fórmula: t = -ln(1 - (NotaAlvo - NotaAtual) / (NotaMáx - NotaAtual)) / k
       const t = -Math.log(val) / k;
       return t;
     }
 
-    // Chart setup
+    // Inicializa ou atualiza o gráfico de linha de progresso de nota.
     let chart = null;
-    function createChart(labels, data) {
+    function criarGrafico(labels, data) {
       const ctx = document.getElementById('chart').getContext('2d');
-      if (chart) chart.destroy();
+      if (chart) chart.destroy(); // Destrói o gráfico anterior, se existir
       chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -190,15 +300,17 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
       });
     }
 
-    function render() {
+    // Função principal que coleta as entradas, calcula a previsão, atualiza o texto e plota o gráfico.
+    function renderizar() {
       const current = parseFloat(currentInput.value) || 0;
       const hours = parseFloat(hoursInput.value) || 0;
       const difficulty = difficultyInput.value;
       const quality = parseFloat(qualityInput.value) || 1;
       const target = parseFloat(targetInput.value);
 
-      const predicted = predict(current, hours, difficulty, quality);
+      const predicted = preverNota(current, hours, difficulty, quality);
 
+      // Exibe a previsão de nota
       outputDiv.style.display = 'block';
       outputDiv.innerHTML = `
         <strong>Disciplina:</strong> ${el('subject').value || '—'}<br>
@@ -206,18 +318,20 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
         <strong>Previsão de nota:</strong> <span style="color:#7c3aed;font-weight:700">${predicted.toFixed(2)}</span> / 10
       `;
 
+      // Prepara os dados para plotar a curva de progresso (de 0h até o máximo de horas plotado)
       const maxHoursPlot = Math.min(Math.max(10, hours * 2), 200);
       const step = Math.max(1, Math.ceil(maxHoursPlot / 60));
       const labels = [];
       const data = [];
       for (let h = 0; h <= maxHoursPlot; h += step) {
         labels.push(h.toFixed(0));
-        data.push(predict(current, h, difficulty, quality).toFixed(3));
+        data.push(preverNota(current, h, difficulty, quality).toFixed(3));
       }
-      createChart(labels, data);
+      criarGrafico(labels, data);
 
+      // Calcula e exibe as horas necessárias para atingir a meta, se houver
       if (!isNaN(target) && target > current) {
-        const needed = hoursToReach(current, target, difficulty, quality);
+        const needed = horasParaAlcancar(current, target, difficulty, quality);
         hoursNeededDiv.style.display = 'block';
         if (!isFinite(needed) || needed > 10000) {
           hoursNeededDiv.innerHTML = `<strong>Horas para atingir ${target.toFixed(1)}:</strong> impossível (ou décadas) — objetivo muito próximo de 10. Considere ajustar a meta.`;
@@ -229,10 +343,13 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
       }
     }
 
+    // Evento disparado ao clicar no botão "Calcular previsão"
     document.getElementById('calc').addEventListener('click', e => {
       e.preventDefault();
       const current = parseFloat(currentInput.value);
       const hours = parseFloat(hoursInput.value);
+      
+      // Validação das entradas
       if (isNaN(current) || current < 0 || current > 10) {
         alert('Digite uma nota atual válida entre 0 e 10.');
         return;
@@ -241,11 +358,12 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
         alert('Digite um número de horas válido (>= 0).');
         return;
       }
-      render();
+      renderizar();
     });
 
+    // Renderiza o gráfico e as previsões ao carregar a página
     window.addEventListener('load', () => {
-      render();
+      renderizar();
     });
   </script>
 </body>

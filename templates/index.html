@@ -13,28 +13,129 @@
   --muted:#94a3b8;
   --glass: rgba(255,255,255,0.03);
 }
-*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-body{margin:0;background:linear-gradient(180deg,#071026 0%, #081224 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
-.wrap{width:100%;max-width:1200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.7);}
-header{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
-.logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021223;}
-h1{font-size:20px;margin:0;}
-.pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.025);font-size:12px;margin-right:6px;}
-.muted{color:var(--muted);font-size:14px;}
-.grid{display:grid;grid-template-columns:1fr 2fr;gap:18px;}
-.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);}
-input,select,button{width:100%;padding:8px 10px;margin-top:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);color:inherit}
-button{background:var(--accent);color:#021223;font-weight:700;cursor:pointer;border:none}
-.small{flex:1}
-.row{display:flex;gap:10px}
-.chart{height:260px}
-.table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
-table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;text-align:left}
-.nav-btn{display:inline-block;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);text-decoration:none;margin-left:auto}
-.footer{margin-top:12px;color:var(--muted);font-size:13px}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(180deg,#071026 0%, #081224 60%);
+  color:#e6eef6;
+  min-height:100vh;
+  display:flex;align-items:flex-start;
+  justify-content:center;
+  padding:28px;
+}
+
+.wrap{
+  width:100%;
+  max-width:1200px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.7);
+}
+
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:14px;
+}
+
+.logo{
+  width:56px;
+  height:56px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#2dd4bf);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#021223;
+}
+
+h1{
+  font-size:20px;
+  margin:0;
+}
+
+.pill{display:inline-block;
+  padding:6px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.025);
+  font-size:12px;
+  margin-right:6px;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:14px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:18px;
+}
+.card{
+  background:var(--card);
+  padding:16px;
+  border-radius:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
+}
+input,select,button{
+  width:100%;
+  padding:8px 10px;
+  margin-top:6px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.03);
+  background:var(--glass);color:inherit
+}
+button{
+  background:var(--accent);
+  color:#021223;
+  font-weight:700;
+  cursor:pointer;
+  border:none
+}
+.small{
+  flex:1
+}
+.row{
+  display:flex;
+  gap:10px}
+.chart{
+  height:260px
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+  margin-top:8px
+}
+table th,table td{
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:6px;
+  text-align:left
+}
+.nav-btn{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.02);
+  color:var(--muted);
+  text-decoration:none;
+  margin-left:auto
+}
+.footer{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:13px
+}
 @media (max-width:900px){.grid{grid-template-columns:1fr}.chart{height:180px}}
 
   </style>
+
 </head>
 <body>
   <div class="wrap" role="main">
@@ -76,27 +177,41 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
-
+   
   <script>
     const el=id=>document.getElementById(id);
     let parsed=null;
-    function numberOrNaN(v){const n=parseFloat(v);return isNaN(n)?NaN:n}
+    
+    // Função para tentar converter um valor para número, retornando NaN se falhar.
+    function numeroOuNaN(v){const n=parseFloat(v);return isNaN(n)?NaN:n}
 
-    function computeDerived(df){
+    // Função que calcula métricas derivadas como média de nota geral (avg_all_q), 
+    // total de acessos perdidos (total_no_access) e score de engajamento.
+    function calcularMetricasDerivadas(df){
       const cols=Object.keys(df[0]||{});
+      // Filtra colunas de média de nota por questionário
       const avgCols=cols.filter(c=>c.toLowerCase().startsWith('avg_grade_q'));
+      // Filtra colunas de falta de acesso por questionário
       const noaccessCols=cols.filter(c=>c.toLowerCase().startsWith('no_access_q'));
+      
       df.forEach(row=>{
-        const avgVals=avgCols.map(c=>numberOrNaN(row[c])).filter(x=>!isNaN(x));
-        const noVals=noaccessCols.map(c=>numberOrNaN(row[c])).filter(x=>!isNaN(x));
+        // Coleta e filtra valores numéricos para cálculo da média
+        const avgVals=avgCols.map(c=>numeroOuNaN(row[c])).filter(x=>!isNaN(x));
+        // Coleta e soma o total de não-acessos
+        const noVals=noaccessCols.map(c=>numeroOuNaN(row[c])).filter(x=>!isNaN(x));
+        
+        // Calcula a média geral das notas dos questionários
         row.avg_all_q=avgVals.length?(avgVals.reduce((a,b)=>a+b,0)/avgVals.length):NaN;
+        // Soma o total de vezes sem acesso aos questionários
         row.total_no_access=noVals.length?noVals.reduce((a,b)=>a+b,0):0;
+        // Calcula a pontuação de engajamento
         row.engagement_score=isNaN(row.avg_all_q)?NaN:row.avg_all_q/(1+row.total_no_access);
       });
       return {cols,avgCols,noaccessCols};
     }
 
-    function showPreview(df,n){
+    // Exibe uma pré-visualização (N linhas) do DataFrame (df) em uma tabela HTML.
+    function mostrarPrevia(df,n){
       const preview=df.slice(0,n);
       if(preview.length===0){el('preview').innerHTML='<div class="muted">Sem linhas para mostrar.</div>';return;}
       let html='<table class="table"><thead><tr>'+Object.keys(preview[0]).map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
@@ -105,69 +220,93 @@ table th,table td{border-bottom:1px solid rgba(255,255,255,0.06);padding:6px;tex
       el('preview').innerHTML=html;
     }
 
-    function summarizeNumeric(df,col){
-      const vals=df.map(r=>numberOrNaN(r[col])).filter(x=>!isNaN(x));
+    // Calcula estatísticas básicas (contagem, média, desvio padrão) para uma coluna numérica.
+    function resumirNumerico(df,col){
+      // Filtra apenas valores numéricos válidos da coluna
+      const vals=df.map(r=>numeroOuNaN(r[col])).filter(x=>!isNaN(x));
       if(!vals.length)return{count:0,mean:NaN,sd:NaN};
+      // Usa jStat para média e desvio padrão
       return{count:vals.length,mean:jStat.mean(vals),sd:jStat.stdev(vals,true)};
     }
 
-    function buildMetrics(df){
+    // Constrói e exibe as métricas resumidas (média e desvio padrão) das colunas derivadas.
+    function construirMetricas(df){
       const keys=['avg_all_q','total_no_access','engagement_score'];
       let html='';
       keys.forEach(k=>{
-        const s=summarizeNumeric(df,k);
+        const s=resumirNumerico(df,k);
         html+=`<div><strong>${k}</strong>: média=${isNaN(s.mean)?'—':s.mean.toFixed(3)} • desvio=${isNaN(s.sd)?'—':s.sd.toFixed(3)}</div>`;
       });
       el('metrics').innerHTML=html;
     }
 
-    function plotBoxByUser(df,target='Final_Exam'){
+    // Plota um Box Plot da nota Final_Exam, separado por tipo de User (0 ou 1).
+    function plotarCaixaPorUsuario(df,target='Final_Exam'){
       if(!df.length || !(target in df[0]))return;
-      const g1=df.filter(r=>String(r.User)==='1').map(r=>numberOrNaN(r[target])).filter(x=>!isNaN(x));
-      const g0=df.filter(r=>String(r.User)==='0').map(r=>numberOrNaN(r[target])).filter(x=>!isNaN(x));
+      // Filtra e prepara os dados para User=1
+      const g1=df.filter(r=>String(r.User)==='1').map(r=>numeroOuNaN(r[target])).filter(x=>!isNaN(x));
+      // Filtra e prepara os dados para User=0
+      const g0=df.filter(r=>String(r.User)==='0').map(r=>numeroOuNaN(r[target])).filter(x=>!isNaN(x));
       Plotly.newPlot('chart1',[{y:g0,type:'box',name:'User=0'},{y:g1,type:'box',name:'User=1'}],{title:'Distribuição Final_Exam por User'});
     }
 
-    function plotCorrHeatmap(df,cols){
-      const numericCols=cols.filter(c=>df.some(r=>!isNaN(numberOrNaN(r[c]))));
+    // Plota um Mapa de Calor (Heatmap) mostrando a correlação entre todas as colunas numéricas.
+    function plotarMapaCorrelacao(df,cols){
+      // Identifica apenas as colunas que possuem dados numéricos válidos
+      const numericCols=cols.filter(c=>df.some(r=>!isNaN(numeroOuNaN(r[c]))));
       if(numericCols.length===0){el('chart2').innerHTML='';return;}
+      
+      // Cria a matriz de correlação usando jStat.corrcoeff
       const matrix=numericCols.map(c1=>numericCols.map(c2=>{
-        const pairs=df.map(r=>({a:numberOrNaN(r[c1]),b:numberOrNaN(r[c2])})).filter(p=>!isNaN(p.a)&&!isNaN(p.b));
+        const pairs=df.map(r=>({a:numeroOuNaN(r[c1]),b:numeroOuNaN(r[c2])})).filter(p=>!isNaN(p.a)&&!isNaN(p.b));
         if(pairs.length<2)return 0;return jStat.corrcoeff(pairs.map(p=>p.a),pairs.map(p=>p.b));
       }));
       Plotly.newPlot('chart2',[{z:matrix,x:numericCols,y:numericCols,type:'heatmap',colorscale:'Viridis'}],{title:'Mapa de Correlação'});
     }
 
-    function plotScatterEngagement(df,target='Final_Exam'){
+    // Plota um gráfico de dispersão (Scatter Plot) comparando o Score de Engajamento com a Nota Final.
+    function plotarDispersaoEngajamento(df,target='Final_Exam'){
       if(!df.length || !(target in df[0]))return;
-      const pairs=df.map(r=>({x:numberOrNaN(r.engagement_score),y:numberOrNaN(r[target])})).filter(p=>!isNaN(p.x)&&!isNaN(p.y));
+      // Coleta pares de dados válidos: Engajamento (x) e Nota Final (y)
+      const pairs=df.map(r=>({x:numeroOuNaN(r.engagement_score),y:numeroOuNaN(r[target])})).filter(p=>!isNaN(p.x)&&!isNaN(p.y));
       Plotly.newPlot('chart3',[{x:pairs.map(p=>p.x),y:pairs.map(p=>p.y),mode:'markers',type:'scatter'}],{title:'Engajamento x Nota Final'});
     }
 
+    // Evento disparado ao clicar no botão "Gerar métricas"
     el('btnProcess').addEventListener('click',()=>{
       const f=el('csvfile').files[0];
       if(!f){alert('Escolha um arquivo CSV primeiro.');return;}
+      
+      // Processa o arquivo CSV usando PapaParse
       Papa.parse(f,{header:true,skipEmptyLines:true,delimiter:el('delimiter').value||undefined,complete:function(res){
-        parsed=res.data;const meta=computeDerived(parsed);
-        showPreview(parsed,parseInt(el('previewRows').value)||5);
-        buildMetrics(parsed);
-        plotBoxByUser(parsed);
-        plotCorrHeatmap(parsed,meta.cols);
-        plotScatterEngagement(parsed);
+        parsed=res.data;
+        const meta=calcularMetricasDerivadas(parsed);
+        // Chama as funções para exibir pré-visualização, métricas e gráficos
+        mostrarPrevia(parsed,parseInt(el('previewRows').value)||5);
+        construirMetricas(parsed);
+        plotarCaixaPorUsuario(parsed);
+        plotarMapaCorrelacao(parsed,meta.cols);
+        plotarDispersaoEngajamento(parsed);
         alert('Processamento concluído!');
       }});
     });
 
+    // Evento disparado ao clicar no botão "Baixar resultados"
     el('downloadResults').addEventListener('click',()=>{
       if(!parsed){alert('Nenhum dado processado ainda.');return;}
+      
+      // Converte os dados processados de volta para CSV
       const csv=Papa.unparse(parsed);
       const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
       const url=URL.createObjectURL(blob);
+      
+      // Cria um link temporário para iniciar o download
       const a=document.createElement('a');
       a.href=url;a.download='gamificacao_resultados.csv';document.body.appendChild(a);
       a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
       alert('Download concluído!');
     });
+  </script>
   </script>
 </body>
 </html>
