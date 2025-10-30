@@ -190,6 +190,52 @@ table th,table td{
           <div class="pill">Modelo: curva exponencial com retorno decrescente</div>
           <div style="margin-top:6px">Explicação: com o mesmo número de horas, um estudo de melhor qualidade rende mais progresso. Matérias difíceis têm aprendizagem mais lenta.</div>
         </div>
+
+        <hr style="margin:16px 0;border-color:rgba(255,255,255,0.08)" />
+        <div>
+          <strong>Previsor via Machine Learning (dados de gamificação)</strong>
+          <div class="muted" style="margin:6px 0 10px">Preencha as features do CSV para prever a <em>Final_Exam</em>.</div>
+
+          <div class="row">
+            <div class="small">
+              <label for="ml_practice">Practice_Exam</label>
+              <input id="ml_practice" type="number" step="0.01" value="5" />
+            </div>
+            <div class="small">
+              <label for="ml_user">User (0/1)</label>
+              <select id="ml_user"><option value="0">0</option><option value="1" selected>1</option></select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="small"><label for="ml_avg1">Avg_Grade_Q1</label><input id="ml_avg1" type="number" step="0.01" value="6" /></div>
+            <div class="small"><label for="ml_avg2">Avg_Grade_Q2</label><input id="ml_avg2" type="number" step="0.01" value="7" /></div>
+          </div>
+          <div class="row">
+            <div class="small"><label for="ml_avg3">Avg_Grade_Q3</label><input id="ml_avg3" type="number" step="0.01" value="7" /></div>
+            <div class="small"><label for="ml_avg4">Avg_Grade_Q4</label><input id="ml_avg4" type="number" step="0.01" value="8" /></div>
+          </div>
+          <div class="row">
+            <div class="small"><label for="ml_avg5">Avg_Grade_Q5</label><input id="ml_avg5" type="number" step="0.01" value="8" /></div>
+            <div class="small"><label for="ml_avg6">Avg_Grade_Q6</label><input id="ml_avg6" type="number" step="0.01" value="8" /></div>
+          </div>
+
+          <div class="row" style="margin-top:8px">
+            <div class="small"><label for="ml_no1">No_access_Q1</label><input id="ml_no1" type="number" step="1" min="0" value="0" /></div>
+            <div class="small"><label for="ml_no2">No_access_Q2</label><input id="ml_no2" type="number" step="1" min="0" value="0" /></div>
+          </div>
+          <div class="row">
+            <div class="small"><label for="ml_no3">No_access_Q3</label><input id="ml_no3" type="number" step="1" min="0" value="0" /></div>
+            <div class="small"><label for="ml_no4">No_access_Q4</label><input id="ml_no4" type="number" step="1" min="0" value="0" /></div>
+          </div>
+          <div class="row">
+            <div class="small"><label for="ml_no5">No_access_Q5</label><input id="ml_no5" type="number" step="1" min="0" value="0" /></div>
+            <div class="small"><label for="ml_no6">No_access_Q6</label><input id="ml_no6" type="number" step="1" min="0" value="0" /></div>
+          </div>
+
+          <button id="ml_predict" style="margin-top:10px;width:100%">Prever com ML</button>
+          <div id="ml_result" class="result" style="display:none;margin-top:8px"></div>
+        </div>
       </div>
 
       <div class="card" aria-label="Resultados e gráfico">
@@ -359,6 +405,50 @@ table th,table td{
         return;
       }
       renderizar();
+    });
+
+    // =============== ML (servidor Flask) ===============
+    function mlPayloadFromInputs(){
+      return {
+        Practice_Exam: parseFloat(document.getElementById('ml_practice').value)||0,
+        User: parseFloat(document.getElementById('ml_user').value)||0,
+        Avg_Grade_Q1: parseFloat(document.getElementById('ml_avg1').value)||0,
+        Avg_Grade_Q2: parseFloat(document.getElementById('ml_avg2').value)||0,
+        Avg_Grade_Q3: parseFloat(document.getElementById('ml_avg3').value)||0,
+        Avg_Grade_Q4: parseFloat(document.getElementById('ml_avg4').value)||0,
+        Avg_Grade_Q5: parseFloat(document.getElementById('ml_avg5').value)||0,
+        Avg_Grade_Q6: parseFloat(document.getElementById('ml_avg6').value)||0,
+        No_access_Q1: parseFloat(document.getElementById('ml_no1').value)||0,
+        No_access_Q2: parseFloat(document.getElementById('ml_no2').value)||0,
+        No_access_Q3: parseFloat(document.getElementById('ml_no3').value)||0,
+        No_access_Q4: parseFloat(document.getElementById('ml_no4').value)||0,
+        No_access_Q5: parseFloat(document.getElementById('ml_no5').value)||0,
+        No_access_Q6: parseFloat(document.getElementById('ml_no6').value)||0,
+      };
+    }
+
+    document.getElementById('ml_predict').addEventListener('click', async ()=>{
+      const payload = mlPayloadFromInputs();
+      try{
+        const res = await fetch('/api/predict',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const box = document.getElementById('ml_result');
+        if(!res.ok){
+          box.style.display='block';
+          box.innerHTML = `<span style="color:#f87171">Erro:</span> ${data.error||'Falha na previsão'}`;
+          return;
+        }
+        box.style.display='block';
+        box.innerHTML = `<strong>Final_Exam previsto:</strong> <span style="color:#7c3aed">${Number(data.prediction).toFixed(2)}</span> / 10`;
+      }catch(err){
+        const box = document.getElementById('ml_result');
+        box.style.display='block';
+        box.innerHTML = `<span style="color:#f87171">Erro de rede:</span> ${(err&&err.message)||err}`;
+      }
     });
 
     // Renderiza o gráfico e as previsões ao carregar a página
