@@ -299,13 +299,15 @@ table th,table td{
     function horasParaAlcancar(current, target, difficulty, quality) {
       const maxNote = 10;
       if (target <= current) return 0;
-      if (target >= maxNote) return Infinity;
+      // Para evitar infinito ao buscar 10 exato, miramos em 9.99 (aproximação de 10)
+      const epsilonTarget = maxNote - 0.01;
+      const effectiveTarget = Math.min(target, epsilonTarget);
       
       const baseK = baseKmap[difficulty] || 0.12;
       const k = baseK * quality;
       
       // Inverte a fórmula exponencial para isolar o tempo (t)
-      const ratio = (target - current) / (maxNote - current);
+      const ratio = (effectiveTarget - current) / (maxNote - current);
       if (ratio >= 1) return Infinity;
       const val = 1 - ratio;
       if (val <= 0) return Infinity;
@@ -382,7 +384,9 @@ table th,table td{
         if (!isFinite(needed) || needed > 10000) {
           hoursNeededDiv.innerHTML = `<strong>Horas para atingir ${target.toFixed(1)}:</strong> impossível (ou décadas) — objetivo muito próximo de 10. Considere ajustar a meta.`;
         } else {
-          hoursNeededDiv.innerHTML = `<strong>Horas para atingir ${target.toFixed(1)}:</strong> ~ <strong>${needed.toFixed(1)}h</strong> (estimado)`;
+          const displayedTarget = Math.min(target, 9.99);
+          const label = target >= 10 ? `aproximar 10 (≈ ${displayedTarget.toFixed(2)})` : `${displayedTarget.toFixed(1)}`;
+          hoursNeededDiv.innerHTML = `<strong>Horas para ${label}:</strong> ~ <strong>${needed.toFixed(1)}h</strong> (estimado)`;
         }
       } else {
         hoursNeededDiv.style.display = 'none';
